@@ -1,0 +1,32 @@
+@startuml
+title Modernization Run (Golden-Master Comparison)
+
+actor Engineer as Dev
+participant "COBOL Binary\n./dailypost" as Cobol
+participant "Parser→IR\nparse_stub.py" as Parser
+participant "IR JSON\nparsing/out/ir.json" as IR
+participant "Alloy Gen\nir_to_alloy.py" as AlloyGen
+participant "Modern Runner\n(Kotlin/Python)" as Modern
+participant "Comparator\ncompare_runs.py" as Diff
+participant "Data files\n(data/*)" as Data
+participant "Artifacts\n(out/, tests/artifacts/)" as Art
+
+Dev -> Cobol : make gm-legacy
+Cobol -> Data : read inputs
+Cobol -> Art : write accounts_out_legacy.dat
+
+Dev -> Parser : make parse
+Parser -> IR : emit ir.json
+
+Dev -> AlloyGen : make alloy
+AlloyGen -> Art : write formal/alloy/facts.als
+
+Dev -> Modern : run Kotlin/Python
+Modern -> Data : read inputs
+Modern -> Art : write accounts_out_modern.dat\nwrite exceptions_modern.dat
+
+Dev -> Diff : make gm-diff
+Diff -> Art : decode both .dat to CSV\ncompute SHA-256 digests
+Diff --> Dev : diff_summary.txt + status
+
+@enduml

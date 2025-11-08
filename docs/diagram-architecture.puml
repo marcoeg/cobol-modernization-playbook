@@ -1,0 +1,73 @@
+@startuml
+title COBOL → IR → Alloy → Kotlin/Python → Comparator (Modernization Pipeline)
+
+skinparam componentStyle rectangle
+skinparam rectangle {
+  BackgroundColor<<legacy>> #f7e6e6
+  BackgroundColor<<ir>>     #e9f1fb
+  BackgroundColor<<formal>> #e7f7ef
+  BackgroundColor<<modern>> #fff3d6
+  BackgroundColor<<cmp>>    #efe9fb
+}
+
+rectangle "Legacy Layer" <<legacy>> {
+  component "COBOL Source\n(cobol/DAILYPOST.cbl)" as COBOL
+  component "COBOL Binary\n(./dailypost)" as BIN
+  COBOL --> BIN : cobc/build.sh
+}
+
+rectangle "Inputs/Outputs" {
+  component "data/\ninputs" as DATA
+  component "out/\noutputs" as OUT
+  DATA -[hidden]- OUT
+}
+
+rectangle "IR Extraction" <<ir>> {
+  component "Parser / Extractor\n(scripts/parse_stub.py)" as PARSE
+  artifact "IR JSON\n(parsing/out/ir.json)" as IR
+  PARSE --> IR
+}
+
+rectangle "Formal Spec" <<formal>> {
+  component "Alloy Base Model\n(formal/alloy/banking.als)" as AL_BASE
+  component "IR→Alloy Facts\n(scripts/ir_to_alloy.py)" as AL_GEN
+  artifact "facts.als" as FACTS
+  AL_GEN --> FACTS
+  AL_BASE -[hidden]- FACTS
+}
+
+rectangle "Modern Rewrites" <<modern>> {
+  component "Kotlin Runner\n(rewrite/kotlin/...)" as KOTLIN
+  component "Python Runner\n(scripts/modern_runner.py)" as PY
+}
+
+rectangle "Comparator" <<cmp>> {
+  component "Decode + Diff\n(decode_accounts.py,\ncompare_accounts.py,\ncompare_runs.py)" as CMP
+  artifact "CSV & Reports\n(tests/artifacts/*.csv,\n.../diff_summary.txt)" as RPTS
+  CMP --> RPTS
+}
+
+DATA --> BIN : reads
+BIN --> OUT : writes (legacy)
+PARSE <-- COBOL : copybooks + PIC\n(record layouts)
+PARSE --> IR : types, fields,\nencodings, flow
+
+IR --> AL_GEN
+IR --> KOTLIN : codegen stubs
+IR --> PY      : I/O schema
+
+DATA --> KOTLIN : reads
+DATA --> PY     : reads
+KOTLIN --> OUT : accounts_out_modern.dat\nexceptions_modern.dat
+PY --> OUT     : accounts_out_modern.dat\nexceptions_modern.dat
+
+OUT --> CMP : legacy & modern .dat
+BIN --> CMP : via out/accounts_out.dat
+CMP --> RPTS : diff + sha256
+
+note right of CMP
+  make gm-legacy
+  make gm-diff
+end note
+
+@enduml

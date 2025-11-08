@@ -1,0 +1,30 @@
+# OS
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+.env
+
+# COBOL artifacts
+dailypost
+out/
+tests/artifacts/
+
+# Kotlin/Gradle
+.gradle/
+build/
+rewrite/kotlin/.gradle/
+rewrite/kotlin/build/
+rewrite/kotlin/out/
+
+# PlantUML cache/images (keep PNGs if you want; comment out if you prefer to keep)
+# *.png
+
+# IDE
+.vscode/
+.idea/
+
+# Misc
+*.log
