@@ -26,12 +26,12 @@ This project defines a **structured path** from COBOL to modern systems by intro
 
 ```mermaid
 flowchart LR
-    A[COBOL Source<br/>DAILYPOST.cbl] --> B[Parser / IR Extractor<br/>make parse]
-    B --> C[Formal Model (Alloy)<br/>make alloy]
-    B --> D[Code Generator<br/>make gen-kotlin]
-    D --> E[Modern Runner (Kotlin/Python)]
-    E --> F[Golden Master Comparator<br/>make gm-diff]
-    F --> G[Equivalence Proof<br/>Bitwise + Semantic Match]
+  A["COBOL Source<br/>DAILYPOST.cbl"] --> B["Parser / IR Extractor<br/><code>make parse</code>"]
+  B --> C["Formal Model (Alloy)<br/><code>make alloy</code>"]
+  B --> D["Code Generator<br/><code>make gen-kotlin</code>"]
+  D --> E["Modern Runner (Kotlin/Python)"]
+  E --> F["Golden Master Comparator<br/><code>make gm-diff</code>"]
+  F --> G["Equivalence Proof<br/>Bitwise + Semantic Match"]
 ```
 
 ---
